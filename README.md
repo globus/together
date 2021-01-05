@@ -36,16 +36,15 @@ subcommand.
 import click
 import together
 
-@click.group("sample")
-def sample():
-    click.echo("at root")
-
 @together.hook
-def register_root_command():
+def together_root_command(config):
+    @click.group("sample")
+    def sample():
+        click.echo("at root")
     return sample
 
 @together.hook
-def register_subcommand():
+def together_subcommand(config):
     # NOTE: 'foo' is a group, which is important for attaching subcommands to
     # it later
     @click.group("foo")
@@ -71,7 +70,7 @@ setup(
 ```
 
 and the plugin itself, which registers multiple commands using the
-`register_subcommand_collection` hook:
+`together_subcommand_collection` hook:
 
 ```python
 # in together_subsample.py
@@ -80,7 +79,7 @@ import together
 
 
 @together.hook
-def register_subcommand_collection():
+def together_subcommand_collection(config):
     @click.command("bar")
     def bar():
         click.echo("bar")
@@ -130,22 +129,32 @@ Several rules govern how plugins execute and their ordering.
 
 1. Plugins are `pluggy` plugins and hooks _execute_ in LIFO order
 2. `together` reverses the order of the resulting registrations to produce FIFO ordering
-3. All `register_subcommand` registrations are added to the CLI before
-   `register_subcommand_collection` registrations are added
+3. All `together_subcommand` registrations are added to the CLI before
+   `together_subcommand_collection` registrations are added
 4. Only the last plugin to register a root command will execute. You should
    only register one root command.
 
-> **NOTE**: register_subcommand_collection hooks do not have their contents
+> **NOTE**: together_subcommand_collection hooks do not have their contents
 > reversed. Rather, if there are two subcommand collections registered in
 > pluginA and pluginB, with pluginA registered before pluginB, then the
 > following will happen:
 > 1. pluginB was the last registered plugin, so its
->    register_subcommand_collection hook runs
+>    together_subcommand_collection hook runs
 > 2. pluginA was the first registered plugin, so its
->    register_subcommand_collection hook runs next
+>    together_subcommand_collection hook runs next
 > 3. pluginB results are appended to pluginA results (so A's registrations will
 >    take effect first!)
 
 For the most part, this will make the plugin subcommand registration operate in
 FIFO order. However, if your plugin attempts to inspect the status of the
 current CLI object, you must be aware of the execution order.
+
+## CHANGELOG
+
+### 0.2.0
+
+* Change hook names and support config
+
+### 0.1.0
+
+* Initial release

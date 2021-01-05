@@ -5,7 +5,7 @@ from together import SubcommandRegistration, TogetherCLI, hook
 
 class BasePlugin:
     @hook
-    def register_root_command(self):
+    def together_root_command(self, config):
         @click.group("mycli")
         def mycli():
             click.echo("hi")
@@ -15,7 +15,7 @@ class BasePlugin:
 
 class FooPlugin:
     @hook
-    def register_subcommand(self):
+    def together_subcommand(self, config):
         @click.command("foo")
         def foo():
             click.echo("in foo")
@@ -25,7 +25,7 @@ class FooPlugin:
 
 class BarPlugin:
     @hook
-    def register_subcommand(self):
+    def together_subcommand(self, config):
         @click.group("bar")
         def bar():
             click.echo("in bar")
@@ -35,7 +35,7 @@ class BarPlugin:
 
 class BazPlugin:
     @hook
-    def register_subcommand(self):
+    def together_subcommand(self, config):
         @click.command("baz")
         def baz():
             click.echo("in baz")

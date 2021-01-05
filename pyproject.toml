@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "together"
-version = "0.1.0"
+version = "0.2.0"
 description = "Pluggable CLIs with click and pluggy"
 authors = ["Stephen Rosen <sirosen@globus.org>"]
 license = "Apache 2.0"

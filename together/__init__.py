@@ -1,4 +1,5 @@
-from together.core import SubcommandRegistration, TogetherCLI, hook
+from together.core import TogetherCLI, hook
+from together.registration import SubcommandRegistration
 
 __all__ = (
     "SubcommandRegistration",
