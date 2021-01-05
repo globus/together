@@ -1,0 +1,28 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks.git
+  rev: v3.3.0
+  hooks:
+    - id: check-merge-conflict
+    - id: trailing-whitespace
+- repo: https://github.com/python/black
+  rev: 20.8b1
+  hooks:
+    - id: black
+      name: "autoformat (black)"
+      types: [python]
+      language_version: python3
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.8.4
+  hooks:
+    - id: flake8
+      name: "lint (flake8)"
+      types: [python]
+      language_version: python3
+      additional_dependencies: ['flake8-bugbear==20.1.4']
+- repo: https://github.com/timothycrosley/isort
+  rev: 5.6.4
+  hooks:
+    - id: isort
+      name: "autoformat (isort)"
+      types: [python]
+      language_version: python3
