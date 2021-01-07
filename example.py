@@ -1,6 +1,6 @@
 import click
 
-from together import SubcommandRegistration, TogetherCLI, hook
+from together import TogetherCLI, hook
 
 
 class BasePlugin:
@@ -20,7 +20,7 @@ class FooPlugin:
         def foo():
             click.echo("in foo")
 
-        return SubcommandRegistration(foo, path=["mycli"])
+        return foo
 
 
 class BarPlugin:
@@ -30,7 +30,7 @@ class BarPlugin:
         def bar():
             click.echo("in bar")
 
-        return SubcommandRegistration(bar, path=["mycli"])
+        return bar
 
 
 class BazPlugin:
@@ -40,11 +40,13 @@ class BazPlugin:
         def baz():
             click.echo("in baz")
 
-        return SubcommandRegistration(baz, path=["mycli", "bar"])
+        return (baz, ["mycli", "bar"])
 
 
 class MyCLI(TogetherCLI):
     def register_plugins(self):
+        """override plugin registration, which defaults to using the 'together'
+        setuptools entry point, in order to explicitly use these plugins"""
         self.plugin_manager.register(BasePlugin())
         self.plugin_manager.register(FooPlugin())
         self.plugin_manager.register(BarPlugin())

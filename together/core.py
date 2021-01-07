@@ -3,6 +3,7 @@ import pluggy
 
 from together.click_tools import traverse_click
 from together.hookspec import TogetherSpec
+from together.registration import SubcommandRegistration
 
 hook = pluggy.HookimplMarker("together")
 
@@ -27,9 +28,16 @@ class TogetherCLI:
     def register_plugins(self):
         """
         By default, `together` loads plugins from entry points under the
-        'together' namespace in setuptools entrypoints. However, you can
+        'together' group in setuptools entrypoints. However, you can
         subclass TogetherCLI and override this method in order to provide
         custom plugin loading for your CLI.
+
+        For example, replace with
+
+        >>> def register_plugins(self):
+        >>>     self.plugin_manager.load_setuptools_entrypoints("mygroup")
+
+        to load plugins under the entrypoint group "mygroup".
         """
         self.plugin_manager.load_setuptools_entrypoints("together")
 
@@ -60,6 +68,9 @@ class TogetherCLI:
 
         self.all_subcommands = list(self.subcommands) + [
             c for cs in self.subcommand_collections for c in cs
+        ]
+        self.all_subcommands = [
+            SubcommandRegistration.convert(x) for x in self.all_subcommands
         ]
 
         for registration in self.all_subcommands:

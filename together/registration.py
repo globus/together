@@ -31,3 +31,13 @@ class SubcommandRegistration:
     ):
         self.command = command
         self.path = path
+
+    @classmethod
+    def convert(cls, hook_output):
+        """convert hook output, which can be a command, tuple of (cmd, path),
+        or a SubcommandRegistration"""
+        if isinstance(hook_output, click.BaseCommand):
+            return cls(hook_output)
+        if isinstance(hook_output, tuple):
+            return cls(*hook_output)
+        return hook_output

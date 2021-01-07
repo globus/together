@@ -51,7 +51,7 @@ def together_subcommand(config):
     def foo():
         click.echo("foo")
 
-    return together.SubcommandRegistration(foo)
+    return foo
 ```
 
 Multiple other plugins can provide subcommands for `sample`. Create
@@ -96,10 +96,10 @@ def together_subcommand_collection(config):
     return [
         # for `bar` to be a subcommand of `foo`, and not the root, we must
         # provide its path within the application
-        together.SubcommandRegistration(bar, ['sample', 'foo']),
+        (bar, ['sample', 'foo']),
         # when providing group registrations to `together`, we only need to provide the root
         # of a group we want to include
-        together.SubcommandRegistration(spam)
+        spam
     ]
 ```
 
@@ -150,6 +150,11 @@ FIFO order. However, if your plugin attempts to inspect the status of the
 current CLI object, you must be aware of the execution order.
 
 ## CHANGELOG
+
+### 0.2.1
+
+* Allow hooks to return command registration info without explicitly wrapping
+  it in a registration object
 
 ### 0.2.0
 
