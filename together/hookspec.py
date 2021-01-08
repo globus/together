@@ -19,15 +19,13 @@ class TogetherSpec:
     @spec_marker
     def together_subcommand(self, config):
         """
-        Register a subcommand by returning a SubcommandRegistration.
-        """
+        Register a subcommand by returning one of
+        - a SubcommandRegistration
+        - a click command (or group)
+        - a 2-tuple of a click command and its path in the command tree
 
-    @spec_marker
-    def together_subcommand_collection(self, config):
-        """
-        Register a subcommand by returning an iterable collection of
-        SubommandRegistration objects, to allow a single plugin to register
-        multiple commands.
+        You may also return a list of any of the above to register multiple
+        commands.
         """
 
     @spec_marker

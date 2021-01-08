@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "together"
-version = "0.2.1"
+version = "0.3.0"
 description = "Pluggable CLIs with click and pluggy"
 authors = ["Stephen Rosen <sirosen@globus.org>"]
 license = "Apache 2.0"
@@ -26,10 +26,10 @@ force_grid_wrap = 0
 combine_as_imports = true
 line_length = 88
 default_section = "THIRDPARTY"
-known_first_party = ["awsflock", "tests"]
+known_first_party = ["together", "tests"]
 
 [tool.pytest.ini_options]
-addopts = "-v --cov awsflock --no-cov-on-fail"
+addopts = "-v --cov together --no-cov-on-fail"
 testpaths = ["tests"]
 
 [tool.coverage.run]

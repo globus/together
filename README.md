@@ -70,7 +70,7 @@ setup(
 ```
 
 and the plugin itself, which registers multiple commands using the
-`together_subcommand_collection` hook:
+`together_subcommand` hook returning a list of commands:
 
 ```python
 # in together_subsample.py
@@ -79,7 +79,7 @@ import together
 
 
 @together.hook
-def together_subcommand_collection(config):
+def together_subcommand(config):
     @click.command("bar")
     def bar():
         click.echo("bar")
@@ -129,27 +129,18 @@ Several rules govern how plugins execute and their ordering.
 
 1. Plugins are `pluggy` plugins and hooks _execute_ in LIFO order
 2. `together` reverses the order of the resulting registrations to produce FIFO ordering
-3. All `together_subcommand` registrations are added to the CLI before
-   `together_subcommand_collection` registrations are added
-4. Only the last plugin to register a root command will execute. You should
+3. Only the last plugin to register a root command will execute. You should
    only register one root command.
 
-> **NOTE**: together_subcommand_collection hooks do not have their contents
-> reversed. Rather, if there are two subcommand collections registered in
-> pluginA and pluginB, with pluginA registered before pluginB, then the
-> following will happen:
-> 1. pluginB was the last registered plugin, so its
->    together_subcommand_collection hook runs
-> 2. pluginA was the first registered plugin, so its
->    together_subcommand_collection hook runs next
-> 3. pluginB results are appended to pluginA results (so A's registrations will
->    take effect first!)
-
 For the most part, this will make the plugin subcommand registration operate in
-FIFO order. However, if your plugin attempts to inspect the status of the
-current CLI object, you must be aware of the execution order.
+FIFO order.
 
 ## CHANGELOG
+
+### 0.3.0
+
+* Replace `together_subcommand_collection` with support in the
+  `together_subcommand` hook for lists of subcommands
 
 ### 0.2.1
 

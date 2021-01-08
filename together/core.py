@@ -22,7 +22,6 @@ class TogetherCLI:
         # other CLI attributes will be populated during the build
         self.root_command = None
         self.subcommands = None
-        self.subcommand_collections = None
         self.all_subcommands = None
 
     def register_plugins(self):
@@ -61,16 +60,10 @@ class TogetherCLI:
         self.subcommands = reversed(
             self.plugin_manager.hook.together_subcommand(config=self.config)
         )
-        # repeat this activity, but with sets of subcommands
-        self.subcommand_collections = reversed(
-            self.plugin_manager.hook.together_subcommand_collection(config=self.config)
-        )
 
-        self.all_subcommands = list(self.subcommands) + [
-            c for cs in self.subcommand_collections for c in cs
-        ]
+        # conversion produces lists of commands; flatten that out
         self.all_subcommands = [
-            SubcommandRegistration.convert(x) for x in self.all_subcommands
+            c for x in self.subcommands for c in SubcommandRegistration.convert(x)
         ]
 
         for registration in self.all_subcommands:

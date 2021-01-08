@@ -35,9 +35,18 @@ class SubcommandRegistration:
     @classmethod
     def convert(cls, hook_output):
         """convert hook output, which can be a command, tuple of (cmd, path),
-        or a SubcommandRegistration"""
+        SubcommandRegistration, or any non-tuple iterable of the aforementioned
+        types (e.g. a list)
+
+        the result will always be a list of SubcommandRegistrations"""
         if isinstance(hook_output, click.BaseCommand):
-            return cls(hook_output)
+            return [cls(hook_output)]
         if isinstance(hook_output, tuple):
-            return cls(*hook_output)
-        return hook_output
+            return [cls(*hook_output)]
+
+        try:
+            iterator = iter(hook_output)
+        except TypeError:  # not iterable
+            return [hook_output]
+        else:
+            return [cls.convert(x) for x in iterator]
