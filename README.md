@@ -137,6 +137,10 @@ FIFO order.
 
 ## CHANGELOG
 
+### 0.3.1
+
+* Bugfix: incorrectly unpacking subcommand lists
+
 ### 0.3.0
 
 * Replace `together_subcommand_collection` with support in the

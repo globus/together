@@ -49,4 +49,6 @@ class SubcommandRegistration:
         except TypeError:  # not iterable
             return [hook_output]
         else:
-            return [cls.convert(x) for x in iterator]
+            # recurse and unpack one layer of nesting to produce a flattened
+            # list
+            return [y for x in iterator for y in cls.convert(x)]
