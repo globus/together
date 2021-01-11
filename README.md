@@ -17,14 +17,14 @@ Define a package which provides your hook implementation as a setuptools
 entrypoint named `"together"`:
 
 ```python
-# in setup.py
+# in together-sample/setup.py
 from setuptools import setup, find_packages
 
 setup(
     name="together-sample",
     install_requires="together",
-    entry_points={"together": ["root = together_sample"]},
-    py_modules=["together_sample"]
+    entry_points={"together": ["root = main"]},
+    py_modules=["main"]
 )
 ```
 
@@ -32,7 +32,7 @@ Then define the `together_sample` module to provide a root command and one
 subcommand.
 
 ```python
-# in together_sample.py
+# in together-sample/main.py
 import click
 import together
 
@@ -58,14 +58,14 @@ Multiple other plugins can provide subcommands for `sample`. Create
 `together-subsample` in another directory:
 
 ```python
-# in setup.py
+# in together-subsample/setup.py
 from setuptools import setup, find_packages
 
 setup(
     name="together-subsample",
     install_requires="together",
-    entry_points={"together": ["subsample = together_subsample"]},
-    py_modules=["together_subsample"]
+    entry_points={"together": ["subsample = main"]},
+    py_modules=["main"]
 )
 ```
 
@@ -73,7 +73,7 @@ and the plugin itself, which registers multiple commands using the
 `together_subcommand` hook returning a list of commands:
 
 ```python
-# in together_subsample.py
+# in together-subsample/main.py
 import click
 import together
 
@@ -103,8 +103,8 @@ def together_subcommand(config):
     ]
 ```
 
-Now, with both `together_sample` and `together_subsample` installed
-(e.g. `pip install -e ./together_sample/; pip install -e ./together_subsample/`)
+Now, with both `together-sample` and `together-subsample` installed
+(e.g. `pip install -e ./together-sample/; pip install -e ./together-subsample/`)
 we can invoke the resulting CLI by building and running:
 
 ```python
@@ -146,7 +146,7 @@ from together import get_state
 def format_option(f):
     def callback(ctx, param, value):
         state = get_state()
-        state.set_value("format", value)
+        state.set("format", value)
     return click.option(
         "--format", type=click.Choice(["json", "text"]), callback=callback
     )(f)
