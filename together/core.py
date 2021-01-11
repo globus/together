@@ -1,9 +1,12 @@
+import warnings
+
 import click
 import pluggy
 
 from together.click_tools import traverse_click
 from together.hookspec import TogetherSpec
 from together.registration import SubcommandRegistration
+from together.state import CommandState
 
 hook = pluggy.HookimplMarker("together")
 
@@ -45,6 +48,27 @@ class TogetherCLI:
         object."""
         return {}
 
+    def define_state_object_at_root(self):
+        """
+        This method is called immediately after the root command is registered.
+
+        `together` will decorate the root command callback to ensure that there is a
+        `together.CommandState` object attached at the root context. The command state
+        object will carry a reference to the config object.
+        """
+        if "obj" in self.root_command.context_settings:
+            warnings.warn(
+                "root_command used obj in context_settings "
+                "it will be overwritten by "
+                "TogetherCLI.define_state_object_at_root"
+            )
+        self.reload_command_state_object()
+
+    def reload_command_state_object(self):
+        """reload hook for the command state; tests can use this to reset to a
+        fresh object (but with the same config"""
+        self.root_command.context_settings["obj"] = CommandState(config=self.config)
+
     def build(self):
         self.root_command = self.plugin_manager.hook.together_root_command(
             config=self.config
@@ -53,6 +77,7 @@ class TogetherCLI:
             raise TypeError(
                 f"Cannot register a non-MultiCommand root: {self.root_command}"
             )
+        self.define_state_object_at_root()
 
         # plugins will fire in LIFO order (part of the pluggy specification),
         # but we want to register subcommands in FIFO order

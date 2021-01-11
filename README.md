@@ -123,6 +123,54 @@ python sample.py foo bar
 python sample.py fruit banana
 ```
 
+### Using CommandState
+
+`together` automatically defines a class, `together.CommandState` which
+implements stateful tracking of option data as it is parsed. This allows the
+value which was passed to a parent command or the root command to be recorded
+on the click context and accessed by child command callbacks.
+
+For example, if you wish to support arguments like `--format=[json|text]` in
+your commands, and allow usage like `mycli --format=json foo` to be valid, you
+need to save and retrieve that option. `CommandState` implements this logic and
+is automatically registered as the context object for commands.
+
+To implement such an option, define a click decorator which uses a callback to
+get the state object and use it for storage. You can also write an easy getter
+function to get back the stored value. Like so:
+
+```python
+import click
+from together import get_state
+
+def format_option(f):
+    def callback(ctx, param, value):
+        state = get_state()
+        state.set_value("format", value)
+    return click.option(
+        "--format", type=click.Choice(["json", "text"]), callback=callback
+    )(f)
+
+
+def get_format():
+    return get_state().get("format")
+```
+
+> **NOTE**: `get_state()` requires that there is an active Click Context
+> it therefore can only normally execute inside of running Click commands
+
+#### Using CommandState to access Config
+
+The configuration object produced by your `together_configure` hooks is
+attached to the CommandState for easy access. All you need to do is get the
+state object and look at its `config` attribute:
+
+```python
+def was_configured_to_foobar():
+    state = get_state()
+    return state.config.get("foobar") is True
+```
+
 ## Plugin Order and Execution
 
 Several rules govern how plugins execute and their ordering.
@@ -136,6 +184,17 @@ For the most part, this will make the plugin subcommand registration operate in
 FIFO order.
 
 ## CHANGELOG
+
+### 0.4.0
+
+* Add the CommandState object supporting arbitrary storage (in an inner dict)
+  and the `get_state` helper
+
+* Add `verbose_option` and `get_verbosity` built on the CommandState object
+
+This can be used to implement the common pattern of defining a single central
+object which is pulled off of the click context to record options which might
+be valid at multiple levels of a command heirarchy.
 
 ### 0.3.1
 
