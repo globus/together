@@ -8,119 +8,73 @@ Build CLIs which `click` `together` using `pluggy`.
 ## Usage
 
 Define a TogetherCLI by registering plugins which register either click.Group
-or click.Command objects. Then, build and invoke the CLI. See `example.py` for
-a complete standalone example.
+or click.Command objects. Then, build and invoke the CLI. See `examples/` for
+complete examples of standalone and multi-package usage.
 
-Basic usage follows.
+### Minimal Usage
 
-Define a package which provides your hook implementation as a setuptools
-entrypoint named `"together"`:
-
-```python
-# in together-sample/setup.py
-from setuptools import setup, find_packages
-
-setup(
-    name="together-sample",
-    install_requires="together",
-    entry_points={"together": ["root = main"]},
-    py_modules=["main"]
-)
-```
-
-Then define the `together_sample` module to provide a root command and one
-subcommand.
+Possibly the smallest usage example possible defines a single command with a
+single subcommand in one file. Each plugin is implemented as a class (though
+implementing plugins as modules is also supported).
 
 ```python
-# in together-sample/main.py
-import click
-import together
-
-@together.hook
-def together_root_command(config):
-    @click.group("sample")
-    def sample():
-        click.echo("at root")
-    return sample
-
-@together.hook
-def together_subcommand(config):
-    # NOTE: 'foo' is a group, which is important for attaching subcommands to
-    # it later
-    @click.group("foo")
-    def foo():
-        click.echo("foo")
-
-    return foo
-```
-
-Multiple other plugins can provide subcommands for `sample`. Create
-`together-subsample` in another directory:
-
-```python
-# in together-subsample/setup.py
-from setuptools import setup, find_packages
-
-setup(
-    name="together-subsample",
-    install_requires="together",
-    entry_points={"together": ["subsample = main"]},
-    py_modules=["main"]
-)
-```
-
-and the plugin itself, which registers multiple commands using the
-`together_subcommand` hook returning a list of commands:
-
-```python
-# in together-subsample/main.py
-import click
+# in mycli.py
 import together
 
 
-@together.hook
-def together_subcommand(config):
-    @click.command("bar")
-    def bar():
-        click.echo("bar")
+class BasePlugin:
+    @together.hook
+    def together_root_command(self, config):
+        @click.group("mycli")
+        def mycli():
+            pass
 
-    @click.group("fruit")
-    def spam():
-        click.echo("fruit")
+        return mycli
 
-    # we can still attach subcommands using normal click mechanisms
-    @spam.command("banana")
-    def banana():
-        click.echo("banana")
 
-    return [
-        # for `bar` to be a subcommand of `foo`, and not the root, we must
-        # provide its path within the application
-        (bar, ['sample', 'foo']),
-        # when providing group registrations to `together`, we only need to provide the root
-        # of a group we want to include
-        spam
-    ]
-```
+class FooPlugin:
+    @together.hook
+    def together_subcommand(self, config):
+        @click.command("foo")
+        def foo():
+            click.echo("running foo")
 
-Now, with both `together-sample` and `together-subsample` installed
-(e.g. `pip install -e ./together-sample/; pip install -e ./together-subsample/`)
-we can invoke the resulting CLI by building and running:
+        return foo
 
-```python
-# sample.py
-import together
 
-runme = together.TogetherCLI().build()
+class MyCLI(together.TogetherCLI):
+    # customize plugin loading to specify these plugins
+    def register_plugins(self):
+        self.plugin_manager.register(BasePlugin())
+        self.plugin_manager.register(FooPlugin())
+
+
+# build the CLI
+runme = MyCLI().build()
+# run it
 runme()
 ```
 
-And we should then be able to run
+This would allow usage like `python mycli.py foo`.
 
-```bash
-python sample.py foo
-python sample.py foo bar
-python sample.py fruit banana
+### Changing Plugin Loading
+
+By default, plugins are loaded by looking up the `together` setuptools
+entrypoint. To define custom plugin loading, override the
+`TogetherCLI.register_plugins` method in a subclass.
+
+For example, you could load a mix of explicit plugins and setuptools
+entrypoints with a custom name like so:
+
+```python
+import mypackage.plugins
+
+class MyCLI(together.TogetherCLI):
+    def register_plugins(self):
+        # self.plugin_manager is a pluggy.PluginManager instance
+        self.plugin_manager.register(mypackage.plugins.Foo)
+        self.plugin_manager.register(mypackage.plugins.Bar)
+        self.plugin_manager.load_setuptools_entrypoints("mypackage")
 ```
 
 ### Using CommandState

@@ -1,0 +1,8 @@
+setup.py
+together_sample.py
+together_sample.egg-info/PKG-INFO
+together_sample.egg-info/SOURCES.txt
+together_sample.egg-info/dependency_links.txt
+together_sample.egg-info/entry_points.txt
+together_sample.egg-info/requires.txt
+together_sample.egg-info/top_level.txt
