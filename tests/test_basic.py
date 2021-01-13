@@ -54,11 +54,12 @@ class MyCLI(TogetherCLI):
 
 
 def test_can_build():
-    main = MyCLI().build()
-    assert isinstance(main, click.Group)
+    cli = MyCLI()
+    cli.build()
+    assert isinstance(cli.root_command, click.Group)
 
 
 def test_invoke_root(run_cmd):
-    main = MyCLI().build()
+    main = MyCLI()
     result = run_cmd(main, "mycli")
     assert result.output == "hi\n"

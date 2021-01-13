@@ -34,23 +34,23 @@ class MyCLI(TogetherCLI):
 
 
 def test_can_run(run_cmd):
-    main = MyCLI().build()
-    assert isinstance(main, click.Group)
+    main = MyCLI()
+    main.build()
+    assert isinstance(main.root_command, click.Group)
     result = run_cmd(main, "mycli foo")
     assert result.output == "verbosity=0\n"
 
 
 def test_verbose_option_on_root(run_cmd):
-    cli_instance = MyCLI()
-    main = cli_instance.build()
+    main = MyCLI()
     result = run_cmd(main, "mycli --verbose foo")
     assert result.output == "verbosity=1\n"
-    cli_instance.reload_command_state_object()  # reset verbosity
+    main.reload_command_state_object()  # reset verbosity
     result = run_cmd(main, "mycli -vvv foo")
     assert result.output == "verbosity=3\n"
 
 
 def test_verbose_option_mixed(run_cmd):
-    main = MyCLI().build()
+    main = MyCLI()
     result = run_cmd(main, "mycli -v foo -v")
     assert result.output == "verbosity=2\n"

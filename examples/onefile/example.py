@@ -53,5 +53,5 @@ class MyCLI(TogetherCLI):
         self.plugin_manager.register(BazPlugin())
 
 
-runme = MyCLI().build()
+runme = MyCLI()
 runme()

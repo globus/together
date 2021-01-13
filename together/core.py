@@ -1,9 +1,11 @@
+import sys
 import warnings
 
 import click
 import pluggy
 
 from together.click_tools import traverse_click
+from together.exception_handlers import ExceptionHandlerCollection
 from together.hookspec import TogetherSpec
 from together.registration import SubcommandRegistration
 from together.state import CommandState
@@ -21,6 +23,13 @@ class TogetherCLI:
         # may be populated by plugins
         self.config = self.get_default_config()
         self.plugin_manager.hook.together_configure(config=self.config)
+
+        # build exception handlersbefore the CLI is built (either order is
+        # acceptable)
+        handlers_raw = self.plugin_manager.hook.together_exception_handler(
+            config=self.config
+        )
+        self.exception_handlers = ExceptionHandlerCollection(handlers_raw)
 
         # other CLI attributes will be populated during the build
         self.root_command = None
@@ -70,6 +79,10 @@ class TogetherCLI:
         self.root_command.context_settings["obj"] = CommandState(config=self.config)
 
     def build(self):
+        # short circuit if the build was already done
+        if self.root_command:
+            return self.root_command
+
         self.root_command = self.plugin_manager.hook.together_root_command(
             config=self.config
         )
@@ -103,3 +116,39 @@ class TogetherCLI:
             parent.add_command(cmd)
 
         return self.root_command
+
+    def process_exception_handler_result(self, callback_result):
+        """
+        (re)define the behavior when a callback is run on an exception
+        The default is to just exit with that integer status
+        """
+        sys.exit(callback_result)
+
+    def __call__(self, *args, **kwargs):
+        """
+        Invoke the built CLI, wrapping the root command in a try-except block
+        which will attempt to match Exceptions against registered exception handlers.
+
+        Note that click exception classes will be caught and reraised as
+        SystemExit by the click command. If you want to intercept
+        `click.Abort` and similar exceptions, you must do so with
+        customizations to your command, not via exception handlers.
+        """
+        self.build()
+
+        try:
+            return self.root_command(*args, **kwargs)
+        except Exception as err:
+            callback = self.exception_handlers.find_callback(err)
+            if not callback:
+                raise
+            self.process_exception_handler_result(callback(err))
+
+        # warn and forcibly exit (rather than raising a new exception here), as
+        # this is supposed to be an unreachable condition in a user-facing
+        # application
+        warnings.warn(
+            "An exception occurred which was not reraised or converted "
+            "into an exit condition. Something went wrong."
+        )
+        sys.exit(255)

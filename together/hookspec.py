@@ -33,3 +33,25 @@ class TogetherSpec:
         """
         Add or modify data in the existing configuration object.
         """
+
+    @spec_marker
+    def together_exception_handler(self, config):
+        """
+        Register an additional exception handler by returning a 3-tuple of the
+        form ``(predicate, callback, priority_level)`` or a 2-tuple of the form
+        ``(predicate, callback)``.
+
+        ``predicate`` must be either (1) an Exception subclass against which the
+        hook will match and run or (2) a callable which accepts an exception
+        object and returns `True` if the hook should be run
+
+        ``priority_level`` is an integer. Higher priority hooks are evaluated
+        before lower priority hooks. The default (when not provided) is 0.
+
+        ``callback`` is the function to invoke when the exception is handled.
+        It should return an integer, which will be used as the application exit
+        code.
+
+        If you wish to register multiple handlers, return a list of such
+        values instead.
+        """

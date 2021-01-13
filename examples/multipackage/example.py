@@ -1,4 +1,4 @@
 import together
 
-runme = together.TogetherCLI().build()
+runme = together.TogetherCLI()
 runme()

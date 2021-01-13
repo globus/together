@@ -50,7 +50,7 @@ class MyCLI(together.TogetherCLI):
 
 
 # build the CLI
-runme = MyCLI().build()
+runme = MyCLI()
 # run it
 runme()
 ```
@@ -138,6 +138,21 @@ For the most part, this will make the plugin subcommand registration operate in
 FIFO order.
 
 ## CHANGELOG
+
+### 0.5.0
+
+* Add the `together_exception_handler` hook for registering exception handlers
+  which can be matched against errors when invoking the CLI app
+
+** Exception handlers combine exception matching functions (predicates),
+   exception handling callbacks, and optional priority levels (to ensure early
+   or late matching)
+
+** Predicates may be boolean functions or exception classes, which will be
+   checked with `isinstance`
+
+* You can (and should) now invoke a TogetherCLI by calling it, not relying upon
+    the `build()` function output
 
 ### 0.4.0
 
