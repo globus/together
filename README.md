@@ -139,16 +139,20 @@ FIFO order.
 
 ## CHANGELOG
 
+### 0.5.1
+
+* Convert from `poetry` to simple `setup.cfg` data
+
 ### 0.5.0
 
 * Add the `together_exception_handler` hook for registering exception handlers
   which can be matched against errors when invoking the CLI app
 
-** Exception handlers combine exception matching functions (predicates),
+ * Exception handlers combine exception matching functions (predicates),
    exception handling callbacks, and optional priority levels (to ensure early
    or late matching)
 
-** Predicates may be boolean functions or exception classes, which will be
+ * Predicates may be boolean functions or exception classes, which will be
    checked with `isinstance`
 
 * You can (and should) now invoke a TogetherCLI by calling it, not relying upon
