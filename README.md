@@ -139,6 +139,10 @@ FIFO order.
 
 ## CHANGELOG
 
+### 0.5.2
+
+* Fix packaging bug
+
 ### 0.5.1
 
 * Convert from `poetry` to simple `setup.cfg` data
@@ -147,11 +151,9 @@ FIFO order.
 
 * Add the `together_exception_handler` hook for registering exception handlers
   which can be matched against errors when invoking the CLI app
-
  * Exception handlers combine exception matching functions (predicates),
    exception handling callbacks, and optional priority levels (to ensure early
    or late matching)
-
  * Predicates may be boolean functions or exception classes, which will be
    checked with `isinstance`
 
